@@ -9,8 +9,8 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { useState } from "react";
-import { signIn as puterSignIn, signOut as puterSignOut} from "lib/puter.action";
+import { useState, useEffect } from "react";
+import { signIn as puterSignIn, signOut as puterSignOut, getCurrentUser} from "lib/puter.action";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -53,10 +53,31 @@ const DEFAULT_AUTH_STATE: AuthState = {
   userId:null
 }
 
-  const [authState, setAuthState] = useState<AuthState>(DEFAULT_AUTH_STATE)
+ 
 
 export default function App() {
 
+  
+const [authState, setAuthState] = useState<AuthState>(DEFAULT_AUTH_STATE)
+
+  const refreshAuth = async () => {
+        try {
+            const user = await getCurrentUser();
+
+            setAuthState({
+                isSignedIn: !!user,
+                userName: user?.username || null,
+                userId: user?.uuid || null,
+            });
+
+            return !!user;
+        } catch {
+            setAuthState(DEFAULT_AUTH_STATE);
+            return false;
+        }
+    }
+
+     
   const signIn = async () => {
     await puterSignIn()
     return await refreshAuth()
@@ -66,6 +87,9 @@ export default function App() {
     puterSignOut()
     return await refreshAuth()
   }
+    useEffect(() => {
+        refreshAuth()
+    }, []);
 
   return (
     <main className="min-h-screen bg-background text-foreground relative z-10" >
@@ -74,9 +98,7 @@ export default function App() {
   )
 }
 
-const refreshAuth = async () =>{
-  
-}
+
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!";
