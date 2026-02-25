@@ -1,7 +1,11 @@
 import type { Route } from "./+types/home";
 import Navbar from "components/Navbar";
-import {ArrowRight, ArrowUpRight, Clock, Layers} from "lucide-react";
+import {ArrowRight, ArrowUpRight, Clock, Layers, Loader} from "lucide-react";
 import Button from "components/ui/Button";
+import Upload from "components/Upload";
+import { useNavigate } from "react-router";
+import { useState } from "react";
+import { createProject } from "lib/puter.action";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -11,8 +15,44 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+
+  const navigate = useNavigate();
+  const [projects, setProjects] = useState<DesignItem[]>([])
+
+
+  const handleUploadComplete = async (base64Image: string) => {
+    const newId = Date.now().toString()
+    const name = `Residence ${newId}`
+
+    const newItem = {
+        id: newId,name, sourceImage:base64Image,
+        renderedImage: undefined,
+        timestamp: Date.now()
+    }
+
+    const saved  = await createProject({item:newItem, visibility:'private'})
+
+    if (!saved) {
+        console.error("Failed to create project");
+        return false
+    }
+    setProjects((prev) => [saved, ...prev])
+
+    navigate(`/visualizer/${newId}`, {
+        state:{
+            initialImage:saved.sourceImage,
+            initialRendered:saved.renderedImage || null,
+            name
+        }
+    })
+
+    return true;
+  }
+
+
+
   return (
-  <div className="home">
+  <div className="home ">
      <Navbar />
      <section className="hero">
               <div className="announce">
@@ -20,13 +60,13 @@ export default function Home() {
                       <div className="pulse"></div>
                   </div>
 
-                  <p>Introducing Roomify 2.0</p>
+                  <p>Introducing archysoft v0.2</p>
               </div>
 
-              <h1>Build beautiful spaces at the speed of thought with Roomify</h1>
+              <h1>Build beautiful spaces at the speed of thought with archysoft</h1>
 
               <p className="subtitle">
-                  Roomify is an AI-first design environment that helps you visualize, render, and ship architectural projects faster  than ever.
+                  Archysoft is an AI-first design environment that helps you visualize, render, and ship architectural projects faster  than ever.
               </p>
 
               <div className="actions">
@@ -52,7 +92,9 @@ export default function Home() {
                           <p>Supports JPG, PNG, formats up to 10MB</p>
                       </div>
 
-                      {/* <Upload onComplete={handleUploadComplete} /> */}
+                      <Upload 
+                      onComplete={handleUploadComplete} 
+                      />
                   </div>
               </div>
           </section>
@@ -67,11 +109,16 @@ export default function Home() {
                   </div>
 
                   <div className="projects-grid">
-                      {/* {projects.map(({id, name, renderedImage, sourceImage, timestamp}) => (
+                      {projects.map(({id, name, renderedImage, sourceImage, timestamp}) => (
                           <div key={id} className="project-card group" onClick={() => navigate(`/visualizer/${id}`)}>
                               <div className="preview">
-                                  <img  src={renderedImage || sourceImage} alt="Project"
-                                  />
+                                  {renderedImage ? (
+                                      <img src={renderedImage} alt="Project" />
+                                  ) : (
+                                      <div className="loading-placeholder">
+                                          <Loader className="animate-spin" size={24} />
+                                      </div>
+                                  )}
 
                                   <div className="badge">
                                       <span>Community</span>
@@ -93,7 +140,7 @@ export default function Home() {
                                   </div>
                               </div>
                           </div>
-                      ))} */}
+                      ))}
                   </div>
               </div>
           </section>

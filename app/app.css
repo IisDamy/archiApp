@@ -20,7 +20,6 @@
 
     body {
         background-color: #fdfbf7;
-        color: #1a1a1a;
         font-family: Inter, sans-serif;
         -webkit-font-smoothing: antialiased;
     }
@@ -422,7 +421,7 @@
             }
 
             h1 {
-                @apply text-6xl md:text-8xl font-serif leading-[0.95] text-black mb-8 max-w-5xl mx-auto;
+                @apply text-6xl md:text-8xl font-serif leading-[0.95] text-orange-300 mb-8 max-w-5xl mx-auto;
             }
 
             .subtitle {

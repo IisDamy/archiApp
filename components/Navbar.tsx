@@ -31,8 +31,8 @@ const Navbar = () => {
                     <div className="brand">
                         <Box  className="logo" />
 
-                        <span className="name">
-                            Roomify
+                        <span className="name uppercase text-orange-500">
+                            archysoft
                         </span>
                     </div>
 
